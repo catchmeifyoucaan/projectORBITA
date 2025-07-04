@@ -253,7 +253,7 @@ async def analyze_image_with_ai(request: AIAnalysisRequest):
     """Analyze satellite imagery using Gemini AI"""
     try:
         # Configure Gemini model
-        model = genai.GenerativeModel('gemini-pro-vision')
+        model = genai.GenerativeModel('gemini-1.5-flash')
         
         # Decode base64 image
         image_data = base64.b64decode(request.image_data)
