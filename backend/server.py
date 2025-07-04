@@ -20,6 +20,12 @@ import io
 import base64
 import google.generativeai as genai
 
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
 # Configure Gemini AI
 genai.configure(api_key=os.environ.get('GEMINI_API_KEY'))
 
