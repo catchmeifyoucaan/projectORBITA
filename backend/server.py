@@ -181,7 +181,11 @@ async def get_satellite_passes(request: SatellitePassRequest):
         for i in range(request.days * 12):  # Check every 2 hours
             t = t0 + timedelta(hours=i*2)
             geocentric = satellite.at(t)
-            difference = geocentric - observer
+            subpoint = wgs84.subpoint(geocentric)
+            
+            # Calculate altitude and azimuth from observer
+            observer_geocentric = observer.at(t)
+            difference = geocentric - observer_geocentric
             topocentric = difference.at(t)
             
             alt, az, distance = topocentric.altaz()
