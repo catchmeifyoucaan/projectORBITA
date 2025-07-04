@@ -285,7 +285,7 @@ async def analyze_image_with_ai(request: AIAnalysisRequest):
 async def detect_changes(before_image: str, after_image: str):
     """Detect changes between two satellite images"""
     try:
-        model = genai.GenerativeModel('gemini-pro-vision')
+        model = genai.GenerativeModel('gemini-1.5-flash')
         
         # Decode images
         before_data = base64.b64decode(before_image)
