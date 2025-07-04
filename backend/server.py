@@ -207,6 +207,8 @@ async def get_satellite_imagery(location: str, date: str = None, image_type: str
         # For now, returning mock data structure
         sentinel_api_key = os.environ.get('SENTINEL_API_KEY')
         
+        print(f"Sentinel API Key: {sentinel_api_key}")  # Debug print
+        
         if not sentinel_api_key:
             raise HTTPException(status_code=503, detail="Sentinel Hub API key not configured")
         
