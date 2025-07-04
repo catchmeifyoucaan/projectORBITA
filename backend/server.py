@@ -175,12 +175,11 @@ async def get_satellite_passes(request: SatellitePassRequest):
         
         # Calculate passes for the next few days
         t0 = ts.now()
-        t1 = ts.now() + timedelta(days=request.days)
         
         passes = []
-        # Simplified pass calculation - in reality, you'd use more sophisticated algorithms
-        for i in range(request.days * 24):  # Check every hour
-            t = t0 + timedelta(hours=i)
+        # Simplified pass calculation - check every 2 hours
+        for i in range(request.days * 12):  # Check every 2 hours
+            t = t0 + timedelta(hours=i*2)
             geocentric = satellite.at(t)
             difference = geocentric - observer
             topocentric = difference.at(t)
