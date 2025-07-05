@@ -20,13 +20,52 @@
   background: #9ca3af;
 }
 
-/* Cesium Globe Styles */
+/* Enhanced Cesium Globe Styles */
+.cesium-container-wrapper {
+  position: relative;
+  background: #000;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
 .cesium-container {
   position: relative;
   background: #000;
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.cesium-loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 16px;
+  z-index: 1000;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #374151;
+  border-top: 4px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .cesium-widget {
@@ -48,6 +87,78 @@
 
 .cesium-widget-credits {
   display: none !important;
+}
+
+/* Industrial monitoring specific styles */
+.industrial-zone-marker {
+  position: absolute;
+  background: rgba(255, 165, 0, 0.8);
+  border: 2px solid #ff6b35;
+  border-radius: 50%;
+  box-shadow: 0 0 15px rgba(255, 107, 53, 0.6);
+  animation: pulse-industrial 2s infinite;
+}
+
+@keyframes pulse-industrial {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.3);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Oil refinery indicator */
+.oil-refinery-indicator {
+  background: linear-gradient(135deg, #ff4500, #ff6347);
+  box-shadow: 0 0 20px rgba(255, 69, 0, 0.8);
+}
+
+/* Gold mine indicator */
+.gold-mine-indicator {
+  background: linear-gradient(135deg, #ffd700, #ffed4e);
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+}
+
+/* Pipeline monitoring */
+.pipeline-monitor {
+  background: linear-gradient(90deg, #ff8c00, #ffa500);
+  height: 4px;
+  box-shadow: 0 0 10px rgba(255, 140, 0, 0.6);
+  animation: pipeline-flow 3s linear infinite;
+}
+
+@keyframes pipeline-flow {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 100% 0%;
+  }
+}
+
+/* Port activity indicators */
+.port-activity {
+  background: radial-gradient(circle, #00bfff, #1e90ff);
+  box-shadow: 0 0 15px rgba(30, 144, 255, 0.6);
+  animation: port-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes port-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
 }
 
 /* Custom animations */
@@ -110,7 +221,7 @@
   }
 }
 
-/* 3D tracking enhancement styles */
+/* Industrial tracking enhancement styles */
 .tracking-enhanced {
   background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 50%, #581c87 100%);
   border-radius: 12px;
@@ -132,6 +243,21 @@
   transform: translateY(-2px);
 }
 
+/* Industrial facility cards */
+.facility-card {
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.1), rgba(255, 69, 0, 0.1));
+  border: 1px solid rgba(255, 107, 53, 0.3);
+  border-radius: 8px;
+  padding: 1rem;
+  transition: all 0.3s ease;
+}
+
+.facility-card:hover {
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.2), rgba(255, 69, 0, 0.2));
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3);
+}
+
 /* Earth observation styles */
 .ndvi-gradient {
   background: linear-gradient(90deg, #8b4513, #ffff00, #32cd32, #006400);
@@ -146,7 +272,7 @@
   color: #9ca3af;
 }
 
-/* Alert severity colors */
+/* Alert severity colors with industrial themes */
 .alert-high {
   border-color: #ef4444;
   background: rgba(239, 68, 68, 0.1);
@@ -160,6 +286,22 @@
 .alert-low {
   border-color: #10b981;
   background: rgba(16, 185, 129, 0.1);
+}
+
+/* Industrial alert specific styling */
+.alert-oil {
+  border-color: #ff6b35;
+  background: rgba(255, 107, 53, 0.1);
+}
+
+.alert-gold {
+  border-color: #ffd700;
+  background: rgba(255, 215, 0, 0.1);
+}
+
+.alert-pipeline {
+  border-color: #ff8c00;
+  background: rgba(255, 140, 0, 0.1);
 }
 
 /* Tab navigation enhanced */
@@ -283,6 +425,23 @@
   filter: drop-shadow(0 0 12px rgba(59, 130, 246, 1));
 }
 
+/* Industrial monitoring specific gradients */
+.refinery-gradient {
+  background: linear-gradient(135deg, #ff4500, #ff6b35, #ff8c00);
+}
+
+.mine-gradient {
+  background: linear-gradient(135deg, #ffd700, #ffed4e, #fff700);
+}
+
+.pipeline-gradient {
+  background: linear-gradient(135deg, #ff8c00, #ffa500, #ffb347);
+}
+
+.port-gradient {
+  background: linear-gradient(135deg, #00bfff, #1e90ff, #4169e1);
+}
+
 /* Responsive design enhancements */
 @media (max-width: 768px) {
   .cesium-container {
@@ -297,6 +456,11 @@
   .tab-button {
     padding: 0.5rem 1rem;
     font-size: 0.875rem;
+  }
+  
+  .industrial-zone-marker {
+    width: 8px;
+    height: 8px;
   }
 }
 
@@ -349,7 +513,7 @@
   }
 }
 
-/* Terminal/console styles */
+/* Terminal/console styles for industrial monitoring */
 .terminal {
   background: linear-gradient(135deg, #000, #1a1a1a);
   color: #00ff00;
@@ -502,4 +666,26 @@
   box-shadow: 
     0 2px 4px rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Industrial monitoring layout */
+.industrial-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.industrial-card {
+  background: linear-gradient(135deg, rgba(31, 41, 55, 0.9), rgba(55, 65, 81, 0.9));
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.industrial-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
 }
