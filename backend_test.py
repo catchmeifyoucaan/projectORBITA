@@ -289,6 +289,13 @@ class ORBITATester:
         if satellites_ok:
             position_ok = self.test_satellite_position()
         
+        # Enhanced 3D functionality tests
+        realtime_ok = self.test_real_time_tracking()
+        orbital_ok = False
+        
+        if satellites_ok:
+            orbital_ok = self.test_orbital_prediction()
+        
         # Additional functionality tests
         passes_ok = self.test_satellite_passes()
         imagery_ok = self.test_earth_observation_imagery()
@@ -306,6 +313,12 @@ class ORBITATester:
         print(f"Health Check: {'✅' if health_ok else '❌'}")
         print(f"Satellite List: {'✅' if satellites_ok else '❌'}")
         print(f"Satellite Position: {'✅' if position_ok else '❌'}")
+        
+        # Enhanced 3D functionality status
+        print("\n🔍 Enhanced 3D Functionality Status:")
+        print(f"Real-time Tracking: {'✅' if realtime_ok else '❌'}")
+        print(f"Orbital Prediction: {'✅' if orbital_ok else '❌'}")
+        print(f"Version 2.0.0-enhanced: {'✅' if self.version_checked else '❌'}")
         
         # Additional functionality status
         print("\n🔍 Additional Functionality Status:")
