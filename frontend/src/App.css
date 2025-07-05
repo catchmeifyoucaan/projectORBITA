@@ -20,6 +20,36 @@
   background: #9ca3af;
 }
 
+/* Cesium Globe Styles */
+.cesium-container {
+  position: relative;
+  background: #000;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.cesium-widget {
+  border-radius: 8px !important;
+}
+
+.cesium-viewer-toolbar {
+  display: none !important;
+}
+
+.cesium-viewer-cesiumWidgetContainer {
+  border-radius: 8px !important;
+}
+
+/* Hide Cesium branding for cleaner look */
+.cesium-credit-logoContainer {
+  display: none !important;
+}
+
+.cesium-widget-credits {
+  display: none !important;
+}
+
 /* Custom animations */
 @keyframes pulse-glow {
   0%, 100% {
@@ -60,6 +90,48 @@
   }
 }
 
+/* Enhanced orbital visualization */
+.orbital-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: 2px solid rgba(59, 130, 246, 0.3);
+  border-radius: 50%;
+  animation: rotate 20s linear infinite;
+}
+
+@keyframes rotate {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+/* 3D tracking enhancement styles */
+.tracking-enhanced {
+  background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 50%, #581c87 100%);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.satellite-info-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 1rem;
+  transition: all 0.3s ease;
+}
+
+.satellite-info-card:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
 /* Earth observation styles */
 .ndvi-gradient {
   background: linear-gradient(90deg, #8b4513, #ffff00, #32cd32, #006400);
@@ -90,10 +162,11 @@
   background: rgba(16, 185, 129, 0.1);
 }
 
-/* Tab navigation active state */
+/* Tab navigation enhanced */
 .tab-active {
   background: linear-gradient(135deg, #3b82f6, #1d4ed8);
   box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+  transform: translateY(-1px);
 }
 
 /* Loading states */
@@ -112,13 +185,13 @@
   }
 }
 
-/* Orbital path visualization */
-.orbital-path {
-  stroke: #3b82f6;
-  stroke-width: 2;
+/* Orbital path visualization for Cesium */
+.cesium-path-highlight {
+  stroke: #00ffff;
+  stroke-width: 3;
   fill: none;
-  stroke-dasharray: 5,5;
-  animation: dash 20s linear infinite;
+  stroke-dasharray: 10,5;
+  animation: dash 30s linear infinite;
 }
 
 @keyframes dash {
@@ -141,12 +214,13 @@
   color: #f59e0b;
 }
 
-/* Map styles */
+/* Enhanced map styles */
 .map-container {
   position: relative;
   background: #1f2937;
   border-radius: 8px;
   overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 .map-overlay {
@@ -172,8 +246,49 @@
   transition: width 0.3s ease;
 }
 
-/* Responsive design */
+/* Enhanced 3D visualization container */
+.globe-container {
+  position: relative;
+  background: radial-gradient(circle at center, #000428 0%, #004e92 100%);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    0 8px 32px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Satellite tracking controls */
+.tracking-controls {
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 8px;
+  padding: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Enhanced data visualization */
+.data-point {
+  fill: #3b82f6;
+  stroke: #1e40af;
+  stroke-width: 2;
+  transition: all 0.3s ease;
+  filter: drop-shadow(0 0 6px rgba(59, 130, 246, 0.6));
+}
+
+.data-point:hover {
+  fill: #60a5fa;
+  stroke: #3b82f6;
+  r: 8;
+  filter: drop-shadow(0 0 12px rgba(59, 130, 246, 1));
+}
+
+/* Responsive design enhancements */
 @media (max-width: 768px) {
+  .cesium-container {
+    height: 300px !important;
+  }
+  
   .satellite-marker {
     width: 8px;
     height: 8px;
@@ -185,34 +300,40 @@
   }
 }
 
-/* Chart styles */
+/* Enhanced chart styles */
 .chart-container {
-  background: #1f2937;
+  background: linear-gradient(135deg, #1f2937, #374151);
   border-radius: 8px;
   padding: 1rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }
 
 .chart-grid {
   stroke: #374151;
   stroke-width: 1;
+  stroke-dasharray: 2,2;
 }
 
 .chart-line {
   stroke: #3b82f6;
-  stroke-width: 2;
+  stroke-width: 3;
   fill: none;
+  filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.5));
 }
 
-/* Notification styles */
+/* Notification enhancements */
 .notification {
   position: fixed;
   top: 1rem;
   right: 1rem;
-  background: #1f2937;
-  border: 1px solid #374151;
+  background: rgba(31, 41, 55, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   padding: 1rem;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  box-shadow: 
+    0 10px 25px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
   z-index: 1000;
   animation: slideIn 0.3s ease;
 }
@@ -228,32 +349,20 @@
   }
 }
 
-/* Data visualization */
-.data-point {
-  fill: #3b82f6;
-  stroke: #1e40af;
-  stroke-width: 2;
-  transition: all 0.3s ease;
-}
-
-.data-point:hover {
-  fill: #60a5fa;
-  stroke: #3b82f6;
-  r: 6;
-}
-
 /* Terminal/console styles */
 .terminal {
-  background: #000;
+  background: linear-gradient(135deg, #000, #1a1a1a);
   color: #00ff00;
   font-family: 'Courier New', monospace;
   padding: 1rem;
   border-radius: 4px;
   overflow-x: auto;
+  box-shadow: inset 0 0 20px rgba(0, 255, 0, 0.1);
 }
 
 .terminal-line {
   margin-bottom: 0.5rem;
+  text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
 }
 
 .terminal-prompt {
@@ -264,14 +373,17 @@
   color: #ffffff;
 }
 
-/* Satellite orbit visualization */
+/* Enhanced satellite orbit visualization */
 .orbit-container {
   position: relative;
   width: 100%;
-  height: 300px;
+  height: 400px;
   background: radial-gradient(circle at center, #000428 0%, #004e92 100%);
-  border-radius: 8px;
+  border-radius: 12px;
   overflow: hidden;
+  box-shadow: 
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    0 8px 32px rgba(0, 0, 0, 0.6);
 }
 
 .earth-sphere {
@@ -279,24 +391,17 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 100px;
-  height: 100px;
+  width: 120px;
+  height: 120px;
   background: radial-gradient(circle at 30% 30%, #4ade80, #059669, #064e3b);
   border-radius: 50%;
-  box-shadow: 0 0 20px rgba(74, 222, 128, 0.3);
+  box-shadow: 
+    0 0 30px rgba(74, 222, 128, 0.4),
+    inset -10px -10px 20px rgba(0, 0, 0, 0.3);
+  animation: earthRotate 60s linear infinite;
 }
 
-.orbit-ring {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  border: 2px solid rgba(59, 130, 246, 0.3);
-  border-radius: 50%;
-  animation: rotate 20s linear infinite;
-}
-
-@keyframes rotate {
+@keyframes earthRotate {
   from {
     transform: translate(-50%, -50%) rotate(0deg);
   }
@@ -305,31 +410,34 @@
   }
 }
 
-/* Data table styles */
+/* Enhanced data table styles */
 .data-table {
   width: 100%;
   border-collapse: collapse;
-  background: #1f2937;
+  background: linear-gradient(135deg, #1f2937, #374151);
   border-radius: 8px;
   overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }
 
 .data-table th {
-  background: #374151;
+  background: linear-gradient(135deg, #374151, #4b5563);
   color: #f9fafb;
   padding: 0.75rem;
   text-align: left;
   font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .data-table td {
   padding: 0.75rem;
-  border-bottom: 1px solid #374151;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   color: #d1d5db;
+  transition: background-color 0.2s ease;
 }
 
 .data-table tr:hover {
-  background: #374151;
+  background: rgba(255, 255, 255, 0.05);
 }
 
 /* Progress indicators */
@@ -339,24 +447,31 @@
   background: #374151;
   border-radius: 4px;
   overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .progress-fill {
   height: 100%;
   background: linear-gradient(90deg, #3b82f6, #1d4ed8);
   transition: width 0.3s ease;
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
 }
 
-/* Utility classes */
+/* Enhanced utility classes */
 .glass-effect {
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
 .neon-text {
   color: #00ffff;
-  text-shadow: 0 0 5px #00ffff, 0 0 10px #00ffff, 0 0 15px #00ffff;
+  text-shadow: 
+    0 0 5px #00ffff, 
+    0 0 10px #00ffff, 
+    0 0 15px #00ffff,
+    0 0 20px #00ffff;
 }
 
 .gradient-text {
@@ -364,4 +479,27 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+/* Enhanced button styles */
+.btn-3d {
+  transform: perspective(1px) translateZ(0);
+  transition: all 0.3s ease;
+  box-shadow: 
+    0 4px 8px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.btn-3d:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 12px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.btn-3d:active {
+  transform: translateY(0);
+  box-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }

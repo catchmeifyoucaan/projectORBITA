@@ -1,7 +1,152 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+
+// 3D Cesium Globe Component
+const CesiumGlobe = ({ satellites, selectedSatellite, onSatelliteSelect }) => {
+  const cesiumContainerRef = useRef(null);
+  const viewerRef = useRef(null);
+  const satelliteEntitiesRef = useRef(new Map());
+
+  useEffect(() => {
+    // Initialize Cesium viewer
+    if (cesiumContainerRef.current && !viewerRef.current) {
+      // Load Cesium dynamically
+      const script = document.createElement('script');
+      script.src = 'https://cesium.com/downloads/cesiumjs/releases/1.111/Build/Cesium/Cesium.js';
+      script.onload = () => {
+        const link = document.createElement('link');
+        link.href = 'https://cesium.com/downloads/cesiumjs/releases/1.111/Build/Cesium/Widgets/widgets.css';
+        link.rel = 'stylesheet';
+        document.head.appendChild(link);
+
+        // Initialize Cesium
+        window.Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlYWE1OWUxNy1mMWZiLTQzYjYtYTQ0OS1kMWFjYmFkNjc5YzciLCJpZCI6NTc3MzMsImlhdCI6MTYyNzg0NTE4Mn0.XcKpgANiY19MC4bdFUPigVBQgs8heI55hO9XhUNjmAA';
+        
+        viewerRef.current = new window.Cesium.Viewer(cesiumContainerRef.current, {
+          terrainProvider: window.Cesium.createWorldTerrain(),
+          homeButton: false,
+          sceneModePicker: false,
+          baseLayerPicker: false,
+          navigationHelpButton: false,
+          animation: false,
+          timeline: false,
+          fullscreenButton: false,
+          geocoder: false,
+          infoBox: false,
+          selectionIndicator: false
+        });
+
+        // Set initial camera position
+        viewerRef.current.camera.setView({
+          destination: window.Cesium.Cartesian3.fromDegrees(-100.0, 40.0, 20000000.0)
+        });
+
+        // Enable lighting
+        viewerRef.current.scene.globe.enableLighting = true;
+      };
+      document.head.appendChild(script);
+    }
+
+    return () => {
+      if (viewerRef.current) {
+        viewerRef.current.destroy();
+        viewerRef.current = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (viewerRef.current && satellites.length > 0) {
+      updateSatellites();
+    }
+  }, [satellites]);
+
+  const updateSatellites = async () => {
+    if (!viewerRef.current || !window.Cesium) return;
+
+    // Clear existing entities
+    satelliteEntitiesRef.current.forEach((entity) => {
+      viewerRef.current.entities.remove(entity);
+    });
+    satelliteEntitiesRef.current.clear();
+
+    // Add satellites to the globe
+    for (const satellite of satellites) {
+      try {
+        const response = await fetch(`${BACKEND_URL}/api/satellites/${satellite.id}/position`);
+        const positionData = await response.json();
+
+        if (positionData.latitude && positionData.longitude) {
+          const entity = viewerRef.current.entities.add({
+            name: satellite.name,
+            position: window.Cesium.Cartesian3.fromDegrees(
+              positionData.longitude,
+              positionData.latitude,
+              positionData.altitude * 1000 // Convert km to meters
+            ),
+            point: {
+              pixelSize: 12,
+              color: selectedSatellite?.id === satellite.id 
+                ? window.Cesium.Color.YELLOW 
+                : window.Cesium.Color.CYAN,
+              outlineColor: window.Cesium.Color.WHITE,
+              outlineWidth: 2,
+              heightReference: window.Cesium.HeightReference.NONE
+            },
+            label: {
+              text: satellite.name,
+              font: '12pt sans-serif',
+              fillColor: window.Cesium.Color.WHITE,
+              outlineColor: window.Cesium.Color.BLACK,
+              outlineWidth: 2,
+              style: window.Cesium.LabelStyle.FILL_AND_OUTLINE,
+              pixelOffset: new window.Cesium.Cartesian2(0, -40),
+              show: selectedSatellite?.id === satellite.id
+            },
+            // Add orbital path
+            path: {
+              resolution: 120,
+              material: selectedSatellite?.id === satellite.id 
+                ? window.Cesium.Color.YELLOW.withAlpha(0.8)
+                : window.Cesium.Color.CYAN.withAlpha(0.4),
+              width: selectedSatellite?.id === satellite.id ? 3 : 1,
+              leadTime: 0,
+              trailTime: 3600 // 1 hour trail
+            }
+          });
+
+          // Store satellite data for clicking
+          entity.satelliteData = satellite;
+          satelliteEntitiesRef.current.set(satellite.id, entity);
+        }
+      } catch (error) {
+        console.error(`Error loading position for ${satellite.name}:`, error);
+      }
+    }
+
+    // Add click handler
+    viewerRef.current.selectedEntityChanged.addEventListener((selectedEntity) => {
+      if (selectedEntity && selectedEntity.satelliteData) {
+        onSatelliteSelect(selectedEntity.satelliteData);
+      }
+    });
+  };
+
+  return (
+    <div 
+      ref={cesiumContainerRef} 
+      className="cesium-container"
+      style={{ 
+        width: '100%', 
+        height: '500px', 
+        borderRadius: '8px',
+        overflow: 'hidden'
+      }}
+    />
+  );
+};
 
 function App() {
   const [activeTab, setActiveTab] = useState('tracking');
@@ -13,6 +158,7 @@ function App() {
   const [alerts, setAlerts] = useState([]);
   const [ndviData, setNdviData] = useState(null);
   const [aiAnalysis, setAiAnalysis] = useState(null);
+  const [satellitePasses, setSatellitePasses] = useState([]);
   const [location, setLocation] = useState({ lat: 40.7128, lng: -74.0060 }); // Default to NYC
 
   // Fetch satellites on component mount
@@ -31,6 +177,17 @@ function App() {
       return () => clearInterval(interval);
     }
   }, [selectedSatellite]);
+
+  // Auto-refresh satellites for 3D view
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (satellites.length > 0) {
+        // This will trigger the 3D view to update
+        setSatellites([...satellites]);
+      }
+    }, 10000); // Update every 10 seconds
+    return () => clearInterval(interval);
+  }, [satellites]);
 
   const fetchSatellites = async () => {
     try {
@@ -52,6 +209,32 @@ function App() {
       setSatellitePosition(data);
     } catch (error) {
       console.error('Error fetching satellite position:', error);
+    }
+  };
+
+  const fetchSatellitePasses = async () => {
+    if (!selectedSatellite) return;
+    
+    try {
+      setLoading(true);
+      const response = await fetch(`${BACKEND_URL}/api/satellites/passes`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          satellite_name: selectedSatellite.name,
+          latitude: location.lat,
+          longitude: location.lng,
+          days: 3
+        })
+      });
+      const data = await response.json();
+      setSatellitePasses(data.passes || []);
+    } catch (error) {
+      console.error('Error fetching satellite passes:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -101,6 +284,9 @@ function App() {
   const handleSatelliteSelect = (satellite) => {
     setSelectedSatellite(satellite);
     fetchSatellitePosition(satellite.id);
+    if (activeTab === 'tracking') {
+      fetchSatellitePasses();
+    }
   };
 
   const TabButton = ({ id, label, active, onClick }) => (
@@ -166,6 +352,9 @@ function App() {
               <div className="bg-green-500 px-3 py-1 rounded-full text-sm">
                 ● Live
               </div>
+              <div className="bg-blue-500 px-3 py-1 rounded-full text-sm">
+                🌍 3D Enhanced
+              </div>
             </div>
           </div>
         </div>
@@ -177,7 +366,7 @@ function App() {
           <div className="flex space-x-1">
             <TabButton
               id="tracking"
-              label="🛰️ Satellite Tracking"
+              label="🛰️ 3D Satellite Tracking"
               active={activeTab === 'tracking'}
               onClick={() => setActiveTab('tracking')}
             />
@@ -237,92 +426,136 @@ function App() {
 
         {/* Tab Content */}
         {activeTab === 'tracking' && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Satellite List */}
+          <div className="space-y-8">
+            {/* 3D Globe Visualization */}
             <div className="bg-gray-800 rounded-lg p-6">
-              <h2 className="text-xl font-bold mb-4">Available Satellites</h2>
-              {loading ? (
-                <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
-                  <p className="text-gray-400 mt-2">Loading satellites...</p>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold">🌍 Real-time 3D Satellite Tracking</h2>
+                <div className="text-sm text-gray-400">
+                  {selectedSatellite ? `Tracking: ${selectedSatellite.name}` : 'Click a satellite to track'}
                 </div>
-              ) : (
-                <div className="space-y-2 max-h-96 overflow-y-auto">
-                  {satellites.map((satellite) => (
-                    <div
-                      key={satellite.id}
-                      className={`p-3 rounded cursor-pointer transition-colors ${
-                        selectedSatellite?.id === satellite.id
-                          ? 'bg-blue-600'
-                          : 'bg-gray-700 hover:bg-gray-600'
-                      }`}
-                      onClick={() => handleSatelliteSelect(satellite)}
+              </div>
+              <CesiumGlobe 
+                satellites={satellites}
+                selectedSatellite={selectedSatellite}
+                onSatelliteSelect={handleSatelliteSelect}
+              />
+              <div className="mt-4 text-xs text-gray-500">
+                🎮 Interactive controls: Mouse to rotate, scroll to zoom, click satellites to track
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Satellite List */}
+              <div className="bg-gray-800 rounded-lg p-6">
+                <h2 className="text-xl font-bold mb-4">Available Satellites</h2>
+                {loading ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+                    <p className="text-gray-400 mt-2">Loading satellites...</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2 max-h-96 overflow-y-auto">
+                    {satellites.map((satellite) => (
+                      <div
+                        key={satellite.id}
+                        className={`p-3 rounded cursor-pointer transition-colors ${
+                          selectedSatellite?.id === satellite.id
+                            ? 'bg-blue-600'
+                            : 'bg-gray-700 hover:bg-gray-600'
+                        }`}
+                        onClick={() => handleSatelliteSelect(satellite)}
+                      >
+                        <div className="font-medium">{satellite.name}</div>
+                        <div className="text-sm text-gray-400">
+                          ID: {satellite.catalog_number}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Satellite Position */}
+              <div className="bg-gray-800 rounded-lg p-6">
+                <h2 className="text-xl font-bold mb-4">Real-time Position</h2>
+                {selectedSatellite ? (
+                  <div>
+                    <h3 className="font-semibold text-blue-400 mb-4">
+                      {selectedSatellite.name}
+                    </h3>
+                    {satellitePosition ? (
+                      <div className="space-y-3">
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">Latitude:</span>
+                          <span className="font-mono">{satellitePosition.latitude?.toFixed(4)}°</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">Longitude:</span>
+                          <span className="font-mono">{satellitePosition.longitude?.toFixed(4)}°</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">Altitude:</span>
+                          <span className="font-mono">{satellitePosition.altitude?.toFixed(2)} km</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">Velocity:</span>
+                          <span className="font-mono">{satellitePosition.velocity?.toFixed(2)} km/s</span>
+                        </div>
+                        <div className="text-xs text-gray-500 mt-4">
+                          Last updated: {new Date(satellitePosition.timestamp).toLocaleTimeString()}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto"></div>
+                        <p className="text-gray-400 mt-2">Calculating position...</p>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-400">
+                    Select a satellite to view its position
+                  </div>
+                )}
+              </div>
+
+              {/* Satellite Passes */}
+              <div className="bg-gray-800 rounded-lg p-6">
+                <h2 className="text-xl font-bold mb-4">Upcoming Passes</h2>
+                {selectedSatellite ? (
+                  <div>
+                    <button
+                      onClick={fetchSatellitePasses}
+                      className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition-colors mb-4"
                     >
-                      <div className="font-medium">{satellite.name}</div>
-                      <div className="text-sm text-gray-400">
-                        ID: {satellite.catalog_number}
+                      Calculate Passes
+                    </button>
+                    {satellitePasses.length > 0 ? (
+                      <div className="space-y-2 max-h-64 overflow-y-auto">
+                        {satellitePasses.slice(0, 5).map((pass, index) => (
+                          <div key={index} className="bg-gray-700 p-3 rounded">
+                            <div className="text-sm font-medium">
+                              {new Date(pass.time).toLocaleDateString()} at{' '}
+                              {new Date(pass.time).toLocaleTimeString()}
+                            </div>
+                            <div className="text-xs text-gray-400">
+                              Alt: {pass.altitude.toFixed(1)}° | Az: {pass.azimuth.toFixed(1)}°
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Satellite Position */}
-            <div className="bg-gray-800 rounded-lg p-6">
-              <h2 className="text-xl font-bold mb-4">Real-time Position</h2>
-              {selectedSatellite ? (
-                <div>
-                  <h3 className="font-semibold text-blue-400 mb-4">
-                    {selectedSatellite.name}
-                  </h3>
-                  {satellitePosition ? (
-                    <div className="space-y-3">
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Latitude:</span>
-                        <span className="font-mono">{satellitePosition.latitude?.toFixed(4)}°</span>
+                    ) : (
+                      <div className="text-center py-4 text-gray-400">
+                        Click "Calculate Passes" to see upcoming passes
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Longitude:</span>
-                        <span className="font-mono">{satellitePosition.longitude?.toFixed(4)}°</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Altitude:</span>
-                        <span className="font-mono">{satellitePosition.altitude?.toFixed(2)} km</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Velocity:</span>
-                        <span className="font-mono">{satellitePosition.velocity?.toFixed(2)} km/s</span>
-                      </div>
-                      <div className="text-xs text-gray-500 mt-4">
-                        Last updated: {new Date(satellitePosition.timestamp).toLocaleTimeString()}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="text-center py-8">
-                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto"></div>
-                      <p className="text-gray-400 mt-2">Calculating position...</p>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-gray-400">
-                  Select a satellite to view its position
-                </div>
-              )}
-            </div>
-
-            {/* 3D Visualization Placeholder */}
-            <div className="bg-gray-800 rounded-lg p-6">
-              <h2 className="text-xl font-bold mb-4">3D Orbital View</h2>
-              <div className="bg-gray-700 rounded-lg h-64 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="text-4xl mb-2">🌍</div>
-                  <p className="text-gray-400">3D visualization coming soon</p>
-                  <p className="text-sm text-gray-500 mt-2">
-                    Will show real-time orbital paths
-                  </p>
-                </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-400">
+                    Select a satellite to view passes
+                  </div>
+                )}
               </div>
             </div>
           </div>
