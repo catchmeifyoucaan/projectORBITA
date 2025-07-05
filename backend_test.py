@@ -229,6 +229,52 @@ class ORBITATester:
             print(f"Active Monitoring Zones: {response.get('active_monitoring_zones', 'N/A')}")
             print(f"Recent Alerts: {response.get('recent_alerts', 'N/A')}")
         return success
+        
+    def test_real_time_tracking(self):
+        """Test real-time satellite tracking endpoint"""
+        print("\n===== Testing Real-time Satellite Tracking =====")
+        success, response = self.run_test(
+            "Real-time Tracking",
+            "GET",
+            "/api/satellites/real-time-tracking",
+            200
+        )
+        if success and 'satellites' in response:
+            satellites = response['satellites']
+            print(f"Found {len(satellites)} satellites in real-time tracking")
+            if satellites:
+                print(f"First satellite: {satellites[0]['name']}")
+                print(f"Position: {satellites[0]['latitude']}, {satellites[0]['longitude']}")
+                print(f"Altitude: {satellites[0]['altitude']} km")
+        return success
+        
+    def test_orbital_prediction(self):
+        """Test orbital prediction endpoint"""
+        print("\n===== Testing Orbital Prediction =====")
+        if not self.selected_satellite_id:
+            print("❌ No satellite ID available for orbital prediction test")
+            return False
+            
+        data = {
+            "satellite_id": self.selected_satellite_id,
+            "prediction_hours": 24
+        }
+        
+        success, response = self.run_test(
+            "Orbital Prediction",
+            "POST",
+            "/api/satellites/orbital-prediction",
+            200,
+            data=data
+        )
+        if success and 'orbital_path' in response:
+            path_points = response['orbital_path']
+            print(f"Generated {len(path_points)} orbital path points")
+            print(f"Prediction hours: {response['prediction_hours']}")
+            if path_points:
+                print(f"First point: {path_points[0]['latitude']}, {path_points[0]['longitude']}, {path_points[0]['altitude']} km")
+                print(f"Last point: {path_points[-1]['latitude']}, {path_points[-1]['longitude']}, {path_points[-1]['altitude']} km")
+        return success
 
     def run_all_tests(self):
         """Run all API tests"""
