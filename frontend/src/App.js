@@ -25,7 +25,6 @@ const CesiumGlobe = ({ satellites, selectedSatellite, onSatelliteSelect }) => {
         window.Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlYWE1OWUxNy1mMWZiLTQzYjYtYTQ0OS1kMWFjYmFkNjc5YzciLCJpZCI6NTc3MzMsImlhdCI6MTYyNzg0NTE4Mn0.XcKpgANiY19MC4bdFUPigVBQgs8heI55hO9XhUNjmAA';
         
         viewerRef.current = new window.Cesium.Viewer(cesiumContainerRef.current, {
-          imageryProvider: window.Cesium.createWorldImagery(),
           homeButton: false,
           sceneModePicker: false,
           baseLayerPicker: false,
