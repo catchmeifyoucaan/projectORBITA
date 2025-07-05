@@ -60,6 +60,20 @@ class ORBITATester:
         if success:
             print(f"APIs Configured: {response['apis_configured']}")
             print(f"Satellites Loaded: {response['satellites_loaded']}")
+            print(f"Version: {response.get('version', 'N/A')}")
+            
+            # Check if version is 2.0.0-enhanced
+            if response.get('version') == "2.0.0-enhanced":
+                print("✅ Version 2.0.0-enhanced confirmed")
+                self.version_checked = True
+            else:
+                print("❌ Expected version 2.0.0-enhanced, got", response.get('version', 'N/A'))
+                
+            # Check for 3D features
+            if "3D Satellite Tracking" in response.get('features', []):
+                print("✅ 3D Satellite Tracking feature confirmed")
+            else:
+                print("❌ 3D Satellite Tracking feature not found")
         return success
 
     def test_list_satellites(self):
